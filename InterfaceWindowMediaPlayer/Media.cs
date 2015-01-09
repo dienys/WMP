@@ -1,6 +1,6 @@
 ﻿using System.IO;
 
-namespace MyWindowsMediaPlayer
+namespace InterfaceWindowMediaPlayer
 {
     public class Media
     {
@@ -16,11 +16,16 @@ namespace MyWindowsMediaPlayer
         public string name { get; set; }
         public MediaType mediaType { get; set; }
 
+        public Media()
+        { 
+        
+        }
+
         public Media(string path)
         {
-            string tmpImage = "jpg;png;bmp;jpeg;";
-            string tmpVideo = "wmv;mp4;avi;";
-            string tmpMusic = "mp3;aac;ogg;wav;";
+            string tmpImage = ".jpg;.png;.bmp;.jpeg;";
+            string tmpVideo = ".wmv;.mp4;.avi;";
+            string tmpMusic = ".mp3;.aac;.ogg;.wav;";
 
             this.path = path;
             this.name = Path.GetFileNameWithoutExtension(path);

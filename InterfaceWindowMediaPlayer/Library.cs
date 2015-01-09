@@ -7,7 +7,7 @@ using System.Windows;
 using System.Xml.Serialization;
 using System.IO;
 
-namespace MyWindowsMediaPlayer
+namespace InterfaceWindowMediaPlayer
 {
     public class Library
     {
