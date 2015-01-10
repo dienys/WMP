@@ -14,7 +14,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Windows.Forms;
-using System.IO;
+
 
 namespace InterfaceWindowMediaPlayer
 {
@@ -23,14 +23,13 @@ namespace InterfaceWindowMediaPlayer
     /// </summary>
     public partial class MainWindow : Window
     {
-
-
         private bool userIsDraggingSlider = false;
         string lecture;
         private Search s;
         private PlayList p;
         private PlayList inUse;
-        private int i;
+        private Library lib;
+        private int index;
 
         public MainWindow()
         {
@@ -42,13 +41,18 @@ namespace InterfaceWindowMediaPlayer
             this.s = new Search();
             this.p = new PlayList();
             this.inUse = new PlayList();
+            this.lib = new Library();
+            this.index = 0;
+
+            foreach (string elem in lib.FolderPath)
+                MenuLibrary.Items.Add(elem);
         }
 
-        void BrowseClick(Object sender, EventArgs e)
+        private void BrowseButton_Click(object sender, RoutedEventArgs e)
         {
             OpenFileDialog openDlg = new OpenFileDialog();
 
-            openDlg.Filter = "Films(wmv, avi, mkv, mp4) | *.wmv ; *.avi ; *.mkv ; *.mp4| Musiques(mp3, wmv, wma, MP3) |*.mp3; *.wmv; *.wma; *.MP3 | All(*.*) | *.*";
+            openDlg.Filter = "Video (*.wmv, *.avi, *.mp4)|*.wmv;*.avi;*.mp4|Audio (*.mp3, *.wmv, *.wma)|*.mp3;*.wmv;*.wma;|Image (*.jpg, *.jpeg, *.png, *.bmp)|*.jpg;*.jpeg;*.png;*.bmp|Playlist (*.rblp)|*.rblp|All|*.mp3;*.wmv;*.wma;*.MP3;*.wmv ;*.avi;*.mp4;*.jpg;*.jpeg;*.png;*.bmp";
             openDlg.ShowDialog();
             MediaPathTextBox.Text = openDlg.FileName;
             lecture = openDlg.FileName;
@@ -61,15 +65,17 @@ namespace InterfaceWindowMediaPlayer
             string tocompare = ".rblp";
             if (lecture.IndexOf(System.IO.Path.GetExtension(tocompare)) > 0)
             {
-                previous.Visibility = System.Windows.Visibility.Visible;
-                next.Visibility = System.Windows.Visibility.Visible;
                 
                 inUse = new PlayList(lecture);
+                listplay.Items.Clear();
                 if (inUse.mediaList.Count != 0)
                 {
-                    this.i = 1;
-                    VideoControl.Source = new Uri(inUse.mediaList[0].path);
+                    this.index = 0;
+                    VideoControl.Source = new Uri(inUse.mediaList[this.index++].path);
+                    PlayButton.Content = "Pause";
                     VideoControl.Play();
+                    foreach (Media elem in inUse.mediaList) 
+                      listplay.Items.Add(elem.name);
                 }
                 else
                     System.Windows.Forms.MessageBox.Show("The selected playlist \"" + System.IO.Path.GetFileName(lecture) + "\" is empty.");
@@ -77,10 +83,15 @@ namespace InterfaceWindowMediaPlayer
             else
             {
                 inUse.addMedia(lecture);
+                this.index = this.inUse.mediaList.Count;
+                listplay.Items.Add(inUse.mediaList[this.index - 1].name);
                 VideoControl.Source = new Uri(MediaPathTextBox.Text);
+                PlayButton.Content = "Pause";
                 VideoControl.Play();
+                
             }
         }
+
         private void timer_Tick(object sender, EventArgs e)
         {
             if ((VideoControl.Source != null) && (VideoControl.NaturalDuration.HasTimeSpan) && (!userIsDraggingSlider))
@@ -93,15 +104,22 @@ namespace InterfaceWindowMediaPlayer
 
         void PlayClick(object sender, EventArgs e)
         {
-            VideoControl.Play();
+            if (PlayButton.Content == "Play")
+            {
+                PlayButton.Content = "Pause";
+                VideoControl.Play();
+            }
+            else
+            {
+                PlayButton.Content = "Play";
+                VideoControl.Pause();
+            }
         }
-        void PauseClick(object sender, EventArgs e)
-        {
-            VideoControl.Pause();
-        }
+
         void StopClick(object sender, EventArgs e)
         {
             VideoControl.Stop();
+            VideoControl.Close();
         }
 
         private void sliProgress_DragStarted(object sender, DragStartedEventArgs e)
@@ -112,10 +130,12 @@ namespace InterfaceWindowMediaPlayer
         private void VideoControl_MediaOpened(object sender, RoutedEventArgs e)
         {
         }
+
         private void Element_MediaEnded(object sender, EventArgs e)
         {
             VideoControl.Position = new TimeSpan(0);
         }
+
         private void sliProgress_DragCompleted(object sender, DragCompletedEventArgs e)
         {
             userIsDraggingSlider = false;
@@ -132,27 +152,30 @@ namespace InterfaceWindowMediaPlayer
         private void button1_Click(object sender, RoutedEventArgs e)
         {
            FolderBrowserDialog openDlg = new FolderBrowserDialog();
-           openDlg.ShowDialog();
-
-           
-           
+           openDlg.ShowDialog();   
         }
 
         private void openplaylist(object sender, RoutedEventArgs e)
         {
             OpenFileDialog openDlg = new OpenFileDialog();
-
+            listPlaylist.Items.Clear();
             openDlg.Filter = "Playlist|*.rblp";
             openDlg.ShowDialog();
             p = new PlayList(openDlg.FileName);
             if (openDlg.FileName != "")
-            Save.Visibility = System.Windows.Visibility.Visible;
+            {
+                Save.Visibility = System.Windows.Visibility.Visible;
+                foreach (Media elem in p.mediaList)
+                    listPlaylist.Items.Add(elem.name);
+            }
         }
 
         private void createPlaylist_Click(object sender, RoutedEventArgs e)
         {
+            listPlaylist.Items.Clear();
             p = new PlayList();
             Save.Visibility = System.Windows.Visibility.Visible;
+            Add_Click(Add, null);
         }
 
         private void Save_Click(object sender, RoutedEventArgs e)
@@ -173,23 +196,230 @@ namespace InterfaceWindowMediaPlayer
             listPlaylist.Items.Add(openDlg.FileName);
         }
 
-        private void next_Click(object sender, RoutedEventArgs e)
-        {
-           
-        }
-
         private void VideoControl_MediaEnded(object sender, RoutedEventArgs e)
         {
-            if (this.i < inUse.mediaList.Count)
+            if (loopButton.Content == "Loop: Media")
             {
-                VideoControl.Source = new Uri(p.mediaList[this.i++].path);
+                VideoControl.Close();
+                VideoControl.Source = new Uri((inUse.mediaList[this.index - 1]).path);
                 VideoControl.Play();
+                return;
+            }
+
+            if (this.index < inUse.mediaList.Count)
+            {
+                VideoControl.Source = new Uri((inUse.mediaList[this.index]).path);
+                VideoControl.Play();
+            }
+            else
+            {
+                if (loopButton.Content == "Loop: Playlist")
+                {
+                    this.index = 0;
+                    VideoControl.Source = new Uri((inUse.mediaList[this.index]).path);
+                    VideoControl.Play();
+                }
+                else
+                    VideoControl.Close();
+            }
+            if (this.index < inUse.mediaList.Count + 1)
+                this.index += 1;
+        }
+
+        private void next_Click(object sender, RoutedEventArgs e)
+        {
+            if (loopButton.Content == "Loop: Media")
+            {
+                VideoControl.Close();
+                VideoControl.Source = new Uri((inUse.mediaList[this.index - 1]).path);
+                VideoControl.Play();
+                return;
+            }
+
+            if (this.index < inUse.mediaList.Count)
+            {
+                VideoControl.Source = new Uri((inUse.mediaList[this.index]).path);
+                VideoControl.Play();
+            }
+            else
+            {
+                if (loopButton.Content == "Loop: Playlist")
+                {
+                    this.index = 0;
+                    VideoControl.Source = new Uri((inUse.mediaList[this.index]).path);
+                    VideoControl.Play();
+                }
+                else
+                    VideoControl.Close();
+            }
+
+            if (this.index < inUse.mediaList.Count + 1)
+                this.index += 1;
+        }
+
+        private void previous_Click(object sender, RoutedEventArgs e)
+        {
+            if (loopButton.Content == "Loop: Media")
+            {
+                VideoControl.Close();
+                VideoControl.Source = new Uri((inUse.mediaList[this.index - 1]).path);
+                VideoControl.Play();
+                return;
+            }
+
+            if (this.index > 1)
+            {
+                this.index -= 2;
+                VideoControl.Source = new Uri((inUse.mediaList[this.index]).path);
+                VideoControl.Play();
+                this.index += 1;
+            }
+            else
+            {
+                if (loopButton.Content == "Loop: Playlist")
+                {
+                    this.index = inUse.mediaList.Count - 1;
+                    VideoControl.Source = new Uri((inUse.mediaList[this.index]).path);
+                    VideoControl.Play();
+                    this.index += 1;
+                }
+                else
+                    VideoControl.Close();
             }
 
         }
 
-       
-      
-       
+        private void loopButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (loopButton.Content == "Loop: None")
+                loopButton.Content = "Loop: Playlist";
+            else if (loopButton.Content == "Loop: Playlist")
+                loopButton.Content = "Loop: Media";
+            else
+                loopButton.Content = "Loop: None";
+        }
+
+        private void volumeUpButton_Click(object sender, RoutedEventArgs e)
+        {
+            double volume;
+
+            if (VideoControl.Volume < 1)
+                VideoControl.Volume += 0.1;
+            volume = VideoControl.Volume * 100;
+            if (volume > 90)
+            {
+                VideoControl.Volume = 1;
+                volume = 100;
+            }
+            volumeText.Text = "Volume: " + volume.ToString() + "%";
+        }
+
+        private void volumeDownButton_Click(object sender, RoutedEventArgs e)
+        {
+            double volume;
+
+            if (VideoControl.Volume > 0)
+                VideoControl.Volume -= 0.1;
+            volume = VideoControl.Volume * 100;
+            if (volume < 10)
+            {
+                VideoControl.Volume = 0;
+                volume = 0;
+            }
+            volumeText.Text = "Volume: " + volume.ToString() + "%";
+        }
+
+        private void AddFolder_Click(object sender, RoutedEventArgs e)
+        {
+            FolderBrowserDialog fbd = new FolderBrowserDialog();
+            fbd.ShowDialog();
+            if (fbd.SelectedPath != "")
+                lib.addFolder(fbd.SelectedPath);
+            MenuLibrary.Items.Clear();
+            foreach (string elem in lib.FolderPath)
+            {
+                MenuLibrary.Items.Add(elem);
+            }
+        }
+
+        private void MenuLibrary_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            LibrarylistView.Items.Clear();
+            if (MenuLibrary.SelectedIndex != -1)
+            {
+                foreach (Media elem in lib.LibraryList[MenuLibrary.SelectedIndex].mediaList)
+                {
+                    LibrarylistView.Items.Add(elem.name);
+                }
+            }
+        }
+
+        private void refresh_Click(object sender, RoutedEventArgs e)
+        {
+            lib.refresh(MenuLibrary.SelectedIndex);
+            LibrarylistView.Items.Clear();
+            if (index != -1)
+            {
+                foreach (Media elem in lib.LibraryList[MenuLibrary.SelectedIndex].mediaList)
+                {
+                    LibrarylistView.Items.Add(elem.name);
+                }
+            }
+        }
+
+        private void fullscreenmouse(object sender, RoutedEventArgs e)
+        {
+            Window tmp = new Window();
+            VideoControl.Width = System.Windows.SystemParameters.PrimaryScreenWidth;
+            VideoControl.Height = System.Windows.SystemParameters.PrimaryScreenHeight;
+           tmp.Content = VideoControl;
+           
+        //this.WindowStyle = WindowStyle.None;
+            
+            tmp.WindowState = WindowState.Maximized;
+           
+            
+            
+            
+
+        }
+
+        private void resize(object sender, RoutedEventArgs e)
+        {
+
+            VideoControl.Width = 615;
+            //VideoControl.Height = System.Windows.SystemParameters.PrimaryScreenHeight;
+            this.Content = VideoControl;
+
+        //    this.WindowStyle = WindowStyle.None;
+
+            this.WindowState = WindowState.Normal;
+        }
+
+        private void playMedia(object sender, RoutedEventArgs e)
+        {
+            Media tmp = lib.LibraryList[MenuLibrary.SelectedIndex].mediaList[LibrarylistView.SelectedIndex];
+            
+            if (inUse.mediaList.Count == 0)
+                this.index = 1;
+            if (System.IO.Path.GetExtension(tmp.path) == ".rblp")
+                this.inUse = new PlayList(tmp.path);
+            else
+                this.inUse.addMedia(tmp);
+            VideoControl.Source = new Uri(inUse.mediaList[index - 1].path);
+            listplay.Items.Clear();
+            foreach (Media elem in inUse.mediaList)
+                listplay.Items.Add(elem.name);
+        }
+
+        private void PlaySelectedMedia(object sender, RoutedEventArgs e)
+        {
+            this.index = listplay.SelectedIndex + 1;
+            VideoControl.Source = new Uri(inUse.mediaList[index - 1].path);
+            VideoControl.Play();
+            PlayButton.Content = "Pause";
+        }
     }
+
+    
 }

@@ -23,17 +23,17 @@ namespace InterfaceWindowMediaPlayer
 
         public Media(string path)
         {
-            string tmpImage = ".jpg;.png;.bmp;.jpeg;";
+            string tmpImage = ".jpg;.png;.bmp;.jpeg;.JPG";
             string tmpVideo = ".wmv;.mp4;.avi;";
             string tmpMusic = ".mp3;.aac;.ogg;.wav;";
 
             this.path = path;
             this.name = Path.GetFileNameWithoutExtension(path);
-            if (tmpImage.IndexOf(Path.GetExtension(path)) > 0)
+            if (tmpImage.IndexOf(Path.GetExtension(path)) >= 0)
                 this.mediaType = Media.MediaType.IMAGE;
-            if (tmpVideo.IndexOf(Path.GetExtension(path)) > 0)
+            if (tmpVideo.IndexOf(Path.GetExtension(path)) >= 0)
                 this.mediaType = Media.MediaType.VIDEO;
-            if (tmpMusic.IndexOf(Path.GetExtension(path)) > 0)
+            if (tmpMusic.IndexOf(Path.GetExtension(path)) >= 0)
                 this.mediaType = Media.MediaType.MUSIC;
         }
     }
