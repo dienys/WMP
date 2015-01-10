@@ -1,4 +1,0 @@
-WMP
-===
-
-WindowsMediaPlayer .Net
