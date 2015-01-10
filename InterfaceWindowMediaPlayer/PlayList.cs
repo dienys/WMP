@@ -7,6 +7,7 @@ namespace InterfaceWindowMediaPlayer
 {
     public class PlayList
     {
+        public string path;
         public List<Media> mediaList{ get; set; }
 
         public PlayList()
@@ -15,6 +16,7 @@ namespace InterfaceWindowMediaPlayer
         }
         public PlayList(string path)
         {
+            this.path = path;
             if (File.Exists(path) == true)
             {
                 XmlSerializer serializer = new XmlSerializer(typeof(List<Media>));
@@ -23,8 +25,6 @@ namespace InterfaceWindowMediaPlayer
                 this.mediaList = (List<Media>)serializer.Deserialize(stream);
                 stream.Close();
             }
-            else
-                MessageBox.Show("The file you specified does not exist.");
         }
 
         public void addMedia(string path)
@@ -51,6 +51,11 @@ namespace InterfaceWindowMediaPlayer
             
             serializer.Serialize(stream, this.mediaList);
             stream.Close();
+        }
+
+        public void delete()
+        {
+            File.Delete(this.path);
         }
     }
 }

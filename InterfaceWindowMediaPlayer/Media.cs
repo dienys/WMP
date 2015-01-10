@@ -35,6 +35,9 @@ namespace InterfaceWindowMediaPlayer
                 this.mediaType = Media.MediaType.VIDEO;
             if (tmpMusic.IndexOf(Path.GetExtension(path)) >= 0)
                 this.mediaType = Media.MediaType.MUSIC;
+
+           
+
         }
     }
 

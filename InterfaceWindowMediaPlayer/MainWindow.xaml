@@ -98,16 +98,15 @@
                     </Grid.ColumnDefinitions>
 
                     <!-- Boutons Playlist -->
-                    <Button Background="#FFC1C1DC" Content="Créer Playlist" Foreground="White" Height="20" HorizontalAlignment="Right" Margin="0,9,79,0" Name="createPlaylist" VerticalAlignment="Top" Width="90" Click="createPlaylist_Click" />
-                    <Button Background="#FFC1C1DC" Content="Sauvegarder" Foreground="White" Height="20" HorizontalAlignment="Left" Name="Save" VerticalAlignment="Top" Width="74" Click="Save_Click" Visibility="Hidden" Margin="97,9,0,0" />
-                    <Button Background="#FFC1C1DC" Content="Ajouter" Foreground="White" Height="19" HorizontalAlignment="Right" Margin="0,9,8,0" Name="Add" VerticalAlignment="Top" Width="67" Click="Add_Click" Grid.Column="1" />
-                    <Button Background="#FFC1C1DC" Content="Ouvrir Playlist" Foreground="White" Height="22" HorizontalAlignment="Right" Name="openPlaylist" VerticalAlignment="Top" Width="92" Click="openplaylist" Margin="0,7,247,0" />
-                    <Button Background="#FFC1C1DC" Content="Supprimer" Foreground="White" Height="19" HorizontalAlignment="Right" Margin="0,9,75,0" Name="Remove" VerticalAlignment="Top" Width="85" Grid.ColumnSpan="2" />
-                   
-                     <!-- Fin Boutons Playlist -->
+                    <Button Background="#FFC1C1DC" Content="Sauvegarder" Foreground="White" Height="20" HorizontalAlignment="Left" Name="Save" VerticalAlignment="Top" Width="74" Click="Save_Click" Visibility="Hidden" Margin="217,10,0,0" />
+                    <Button Background="#FFC1C1DC" Content="Ajouter Média" Foreground="White" Height="21" HorizontalAlignment="Left" Margin="18,366,0,0" Name="Add" VerticalAlignment="Top" Width="95" Click="Add_Click" Grid.Row="1" />
+                    <Button Background="#FFC1C1DC" Content="Ouvrir Playlist" Foreground="White" Height="22" HorizontalAlignment="Right" Name="openPlaylist" VerticalAlignment="Top" Width="92" Click="openplaylist" Margin="0,7,229,0" />
+                    <Button Background="#FFC1C1DC" Content="Supprimer" Foreground="White" Height="20" HorizontalAlignment="Right" Margin="0,10,45,0" Name="Remove" VerticalAlignment="Top" Width="83" Grid.ColumnSpan="2" Click="Remove_Click" />
+                    <Button Background="#FFC1C1DC" Content="Supprimer Média" Foreground="White" Height="21" HorizontalAlignment="Right" Margin="0,0,28,42" Name="button1" VerticalAlignment="Bottom" Width="128" Grid.Row="1" Grid.ColumnSpan="2" Click="button1_Click_1" />
+                    <!-- Fin Boutons Playlist -->
 
                      <!-- Affichage Playlist en création -->
-                    <ListView Background="#FF90AFD0" Height="437" HorizontalAlignment="Right" Margin="0,36,28,0" Name="listPlaylist" VerticalAlignment="Top" Width="379" Grid.ColumnSpan="2" Grid.RowSpan="2">
+                    <ListView Background="#FF90AFD0" Height="407" HorizontalAlignment="Right" Margin="0,36,28,0" Name="listPlaylist" VerticalAlignment="Top" Width="379" Grid.ColumnSpan="2" Grid.RowSpan="2">
                         <ListView.View>
                             <GridView>
                                 <GridViewColumn Header="Type" Width="110" />
@@ -116,6 +115,7 @@
                             </GridView>
                         </ListView.View>
                     </ListView>
+                    
                     <!-- Fin Affichage Playlist en création -->
                 </Grid>
             </TabItem>
@@ -131,7 +131,7 @@
         <!-- Fin Browse -->
 
         <!-- Affichage Playlist en lecture -->
-        <ListView Background="#FF90AFD0" Height="471" HorizontalAlignment="Left" Margin="632,49,0,0" Name="listplay" VerticalAlignment="Top" Width="147" MouseDoubleClick="PlaySelectedMedia">
+        <ListView Background="#FF90AFD0" Height="471" HorizontalAlignment="Left" Margin="632,49,0,0" Name="listplay" VerticalAlignment="Top" Width="147" MouseDoubleClick="PlaySelectedMedia" KeyDown="listplay_KeyDown">
             <ListView.View>
                             <GridView>
                                 <GridViewColumn Header="Titre" Width="110" />
